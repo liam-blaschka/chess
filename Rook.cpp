@@ -17,10 +17,12 @@ Rook::Rook(char colour, int row, int col) : Piece('r', colour, row, col) {
 void Rook::findMovesHelper(int r, int c, Piece* board[8][8], bool validMoves[8][8], Vector2i direction) {
     r += direction.y;
     c += direction.x;
-    if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && !(board[r][c] != nullptr && colour == board[r][c]->getColour())) {
+    if (r < 0 || r > 7 || c < 0 || c > 7 || (board[r][c] != nullptr && colour == board[r][c]->getColour())) {
+        return;
+    } else {
         validMoves[r][c] = true;
         if (board[r][c] == nullptr) {
-            return findMovesHelper(r, c, board, validMoves, direction);
+            findMovesHelper(r, c, board, validMoves, direction);
         }
     }
 }

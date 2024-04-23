@@ -49,7 +49,7 @@ void Knight::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
         }
 
         // left bottom
-        if (row + 1 >= 0 && (board[row + 1][col - 2] == nullptr || colour != board[row + 1][col - 2]->getColour())) {
+        if (row + 1 <= 7 && (board[row + 1][col - 2] == nullptr || colour != board[row + 1][col - 2]->getColour())) {
             validMoves[row + 1][col - 2] = true;
         }
     }
@@ -62,7 +62,7 @@ void Knight::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
         }
 
         // right bottom
-        if (row + 1 >= 0 && (board[row + 1][col + 2] == nullptr || colour != board[row + 1][col + 2]->getColour())) {
+        if (row + 1 <= 7 && (board[row + 1][col + 2] == nullptr || colour != board[row + 1][col + 2]->getColour())) {
             validMoves[row + 1][col + 2] = true;
         }
     }

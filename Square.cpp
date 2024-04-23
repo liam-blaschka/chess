@@ -8,7 +8,7 @@ using namespace sf;
 Square::Square(Color colour, int row, int col) {
     this->row = row;
     this->col = col;
-    
+
     square = RectangleShape(Vector2f(75, 75));
     square.setPosition(Vector2f((col * 75), (row * 75)));
     square.setFillColor(colour);
@@ -20,7 +20,7 @@ bool Square::contains(Vector2f point) {
     return bounds.contains(point);
 }
 
-bool Square::activate(bool isActivated) {
+void Square::activate(bool isActivated) {
     Color colour = square.getFillColor();
     if (!isActivated && this->isActivated) {
         colour.g -= 40;

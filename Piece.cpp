@@ -8,6 +8,8 @@ Piece::Piece(char type, char colour, int row, int col) {
     this->colour = colour;
     this->row = row;
     this->col = col;
+    hasMoved = false;
+    isFirstMove = false;
 
     setPosition(row, col);
 
@@ -25,10 +27,22 @@ char Piece::getColour() {
     return colour;
 }
 
-void Piece::makeMove(int row, int col) {
+void Piece::makeMove(Piece* board[8][8], int row, int col) {
+    // move piece in board
+    board[row][col] = this;
+    board[this->row][this->col] = nullptr;
+
+    // set new position
     this->row = row;
     this->col = col;
     setPosition(row, col);
+
+    if (!hasMoved) {
+        hasMoved = true;
+        isFirstMove = true;
+    } else if (isFirstMove) {
+        isFirstMove = false;
+    }
 }
 
 int Piece::getRow() {
@@ -37,6 +51,21 @@ int Piece::getRow() {
 
 int Piece::getCol() {
     return col;
+}
+
+void Piece::setIndexes(int row, int col) {
+    this->row = row;
+    this->col = col;
+}
+
+bool Piece::getIsFirstMove() {
+    return isFirstMove;
+}
+
+void Piece::lastMoved() {
+    if (isFirstMove) {
+        isFirstMove = false;
+    }
 }
 
 void Piece::setPosition(int row, int col) {

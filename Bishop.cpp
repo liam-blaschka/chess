@@ -17,7 +17,9 @@ Bishop::Bishop(char colour, int row, int col) : Piece('b', colour, row, col) {
 void Bishop::findMovesHelper(int r, int c, Piece* board[8][8], bool validMoves[8][8], Vector2i direction) {
     r += direction.y;
     c += direction.x;
-    if (r >= 0 && r <= 7 && c >= 0 && c <= 7 && !(board[r][c] != nullptr && colour == board[r][c]->getColour())) {
+    if (r < 0 || r > 7 || c < 0 || c > 7 || (board[r][c] != nullptr && colour == board[r][c]->getColour())) {
+        return;
+    } else {
         validMoves[r][c] = true;
         if (board[r][c] == nullptr) {
             findMovesHelper(r, c, board, validMoves, direction);

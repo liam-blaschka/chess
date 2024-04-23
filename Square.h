@@ -12,7 +12,7 @@ class Square : public sf::Drawable {
         Square() {}
         Square(sf::Color colour, int row, int col);
         bool contains(sf::Vector2f point);
-        bool activate(bool isActivated);
+        void activate(bool isActivated);
         int getRow();
         int getCol();
         void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

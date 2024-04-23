@@ -10,8 +10,10 @@ Pawn::Pawn(char colour, int row, int col) : Piece('p', colour, row, col) {
     hasMoved = false;
 
     if (colour == 'w') {
+        direction = -1;
         sprite = Sprite(chessPieces, Rect(300, 60, 60, 60));
     } else {
+        direction = 1;
         sprite = Sprite(chessPieces, Rect(300, 0, 60, 60));
     }
     sprite.setScale(1.2, 1.2);
@@ -19,13 +21,6 @@ Pawn::Pawn(char colour, int row, int col) : Piece('p', colour, row, col) {
 }
 
 void Pawn::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
-    int direction;
-    if (colour == 'w') {
-        direction = -1;
-    } else {
-        direction = 1;
-    }
-
     // one space forward
     if (board[row + direction][col] == nullptr) {
         validMoves[row + direction][col] = true;
@@ -36,26 +31,43 @@ void Pawn::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
         }
     }
 
-    // attack left
+    // attack left or en passant left
     if (col - 1 >= 0) {
-        Piece* piece = board[row + direction][col - 1];
-        if (piece != nullptr && colour != piece->getColour()) {
+        Piece* attackedPiece = board[row + direction][col - 1];
+        Piece* enPassantPiece = board[row][col - 1];
+        if ((attackedPiece != nullptr && colour != attackedPiece->getColour()) ||
+            (enPassantPiece != nullptr && enPassantPiece->getType() == 'p' && enPassantPiece->getColour() != colour
+            && enPassantPiece->getIsFirstMove() && (enPassantPiece->getRow() == 3 || enPassantPiece->getRow() == 4)))
+        {
             validMoves[row + direction][col - 1] = true;
         }
     }
 
-    // attack right
+    // attack right or en passant right
     if (col + 1 <= 7) {
-        Piece* piece = board[row + direction][col + 1];
-        if (piece != nullptr && colour != piece->getColour()) {
+        Piece* attackedPiece = board[row + direction][col + 1];
+        Piece* enPassantPiece = board[row][col + 1];
+        if ((attackedPiece != nullptr && colour != attackedPiece->getColour()) ||
+            (enPassantPiece != nullptr && enPassantPiece->getType() == 'p' && enPassantPiece->getColour() != colour
+            && enPassantPiece->getIsFirstMove() && (enPassantPiece->getRow() == 3 || enPassantPiece->getRow() == 4)))
+        {
             validMoves[row + direction][col + 1] = true;
         }
     }
 }
 
-void Pawn::makeMove(int row, int col) {
-    Piece::makeMove(row, col);
-    if (!hasMoved) {
-        hasMoved = true;
+void Pawn::makeMove(Piece* board[8][8], int row, int col) {
+    // if attacking
+    if (this->col != col) {
+        // check if en passant
+        Piece* piece = board[this->row][col];
+        if (piece != nullptr && piece->getType() == 'p' && piece->getColour() != colour && piece->getIsFirstMove()
+            && (piece->getRow() == 3 || piece->getRow() == 4))
+        {
+            delete piece;
+            board[this->row][col] = nullptr;
+        }
     }
+
+    Piece::makeMove(board, row, col);
 }
