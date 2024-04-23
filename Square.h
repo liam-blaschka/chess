@@ -5,8 +5,15 @@ class Square : public sf::Drawable {
     private:
         sf::RectangleShape square;
         sf::FloatRect bounds;
+        bool isActivated;
+        int row;
+        int col;
     public:
         Square() {}
-        Square(sf::Vector2f position, sf::Color colour);
+        Square(sf::Color colour, int row, int col);
+        bool contains(sf::Vector2f point);
+        bool activate(bool isActivated);
+        int getRow();
+        int getCol();
         void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 };

@@ -22,7 +22,7 @@ void Game::run() {
                 // mouse clicked
                 case Event::MouseButtonPressed:
                     if (event.mouseButton.button == Mouse::Left) {
-                        board.mouseClick(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+                        board.mouseClick(sf::Vector2f(event.mouseButton.x, event.mouseButton.y));
                     }
                     break;
 

@@ -1,2 +1,2 @@
 mymake: main.cpp
-		clang++ --std=c++17 -o 1 main.cpp Game.cpp Board.cpp Square.cpp Piece.cpp Pawn.cpp Rook.cpp -I//opt/homebrew/Cellar/sfml/2.6.0/include -L//opt/homebrew/Cellar/sfml/2.6.0/lib -lsfml-graphics -lsfml-window -lsfml-system
+		clang++ --std=c++17 -o 1 main.cpp Game.cpp Board.cpp Square.cpp Piece.cpp Pawn.cpp Rook.cpp Knight.cpp Bishop.cpp Queen.cpp King.cpp -I//opt/homebrew/Cellar/sfml/2.6.0/include -L//opt/homebrew/Cellar/sfml/2.6.0/lib -lsfml-graphics -lsfml-window -lsfml-system
