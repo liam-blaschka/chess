@@ -5,5 +5,6 @@
 class King : public Piece {
     public:
         King(char colour, int row, int col);
-        void findMoves(Piece* board[8][8], bool validMoves[8][8]) override;
+        void findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) override;
+        void makeMove(Piece* board[8][8], int row, int col) override;
 };

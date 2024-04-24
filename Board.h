@@ -12,11 +12,15 @@ class Board : public sf::Drawable {
         char turn;
         Piece* kings[2];
         Piece* lastMovedPiece;
+        bool check;
+        bool checkmate;
+        bool stalemate;
     public:
         void setBoard();
         void mouseClick(sf::Vector2f point);
         void resetValidMoves();
-        bool findCheck();
+        bool isCheck(char colour);
+        bool tryMove(Piece* piece, int row, int col);
         void alternateTurn();
         void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
         ~Board();

@@ -27,7 +27,7 @@ void Rook::findMovesHelper(int r, int c, Piece* board[8][8], bool validMoves[8][
     }
 }
 
-void Rook::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
+void Rook::findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) {
     findMovesHelper(row, col, board, validMoves, Vector2i(-1, 0)); // left
     findMovesHelper(row, col, board, validMoves, Vector2i(1, 0)); // right
     findMovesHelper(row, col, board, validMoves, Vector2i(0, -1)); // up

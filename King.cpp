@@ -14,7 +14,7 @@ King::King(char colour, int row, int col) : Piece('k', colour, row, col) {
     sprite.setPosition(position);
 }
 
-void King::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
+void King::findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) {
     // top
     if (row - 1 >= 0) {
         // top left
@@ -60,4 +60,33 @@ void King::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
             validMoves[row + 1][col + 1] = true;
         }
     }
+
+    // castle
+    if (!hasMoved && !check) {
+        // kingside castle
+        if (board[row][7] != nullptr && !board[row][7]->getHasMoved() && board[row][col + 1] == nullptr && board[row][col + 2] == nullptr) {
+            validMoves[row][col + 2] = true;
+        }
+
+        // queenside castle
+        if (board[row][0] != nullptr && !board[row][0]->getHasMoved() && board[row][col - 1] == nullptr && board[row][col - 2] == nullptr && board[row][col - 3] == nullptr) {
+            validMoves[row][col - 2] = true;
+        }
+    }
+}
+
+void King::makeMove(Piece* board[8][8], int row, int col) {
+    // kingside castle
+    if (col == this->col + 2) {
+        // move rook
+        board[row][7]->makeMove(board, row, col - 1);
+
+    // queenside castle
+    } else if (col == this->col - 2) {
+        // move rook
+        board[row][0]->makeMove(board, row, col + 1);
+    }
+
+    // move king
+    Piece::makeMove(board, row, col);
 }

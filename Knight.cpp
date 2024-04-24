@@ -14,7 +14,7 @@ Knight::Knight(char colour, int row, int col) : Piece('n', colour, row, col) {
     sprite.setPosition(position);
 }
 
-void Knight::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
+void Knight::findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) {
     // top
     if (row - 2 >= 0) {
         // top left

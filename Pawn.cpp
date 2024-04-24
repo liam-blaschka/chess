@@ -20,7 +20,7 @@ Pawn::Pawn(char colour, int row, int col) : Piece('p', colour, row, col) {
     sprite.setPosition(position);
 }
 
-void Pawn::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
+void Pawn::findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) {
     // one space forward
     if (board[row + direction][col] == nullptr) {
         validMoves[row + direction][col] = true;

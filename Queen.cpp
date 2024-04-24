@@ -27,7 +27,7 @@ void Queen::findMovesHelper(int r, int c, Piece* board[8][8], bool validMoves[8]
     }
 }
 
-void Queen::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
+void Queen::findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) {
     // straight
     findMovesHelper(row, col, board, validMoves, Vector2i(-1, 0)); // left
     findMovesHelper(row, col, board, validMoves, Vector2i(1, 0)); // right

@@ -27,7 +27,7 @@ void Bishop::findMovesHelper(int r, int c, Piece* board[8][8], bool validMoves[8
     }
 }
 
-void Bishop::findMoves(Piece* board[8][8], bool validMoves[8][8]) {
+void Bishop::findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) {
     findMovesHelper(row, col, board, validMoves, Vector2i(-1, -1)); // left up
     findMovesHelper(row, col, board, validMoves, Vector2i(1, -1)); // right up
     findMovesHelper(row, col, board, validMoves, Vector2i(-1, 1)); // left down

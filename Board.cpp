@@ -73,6 +73,9 @@ void Board::setBoard() {
     }
     turn = 'w';
     lastMovedPiece = nullptr;
+    check = false;
+    checkmate = false;
+    stalemate = false;
 }
 
 void Board::mouseClick(Vector2f point) {
@@ -100,41 +103,90 @@ void Board::mouseClick(Vector2f point) {
 
                     alternateTurn();
 
-                    //test
-                    if (findCheck()) {
-                        std::cout << "Check!" << std::endl;
+                    // see if check
+                    check = isCheck(turn);
+
+                    // see if checkmate/stalemate
+                    bool result = true;
+                    // loop through each piece
+                    for (int i = 0; i < 8; i++) {
+                        for (int j = 0; j < 8; j++) {
+                            if (pieces[i][j] != nullptr && pieces[i][j]->getColour() == turn) {
+                                // loop through each move piece can make
+                                pieces[i][j]->findMoves(pieces, validMoves, check);
+                                for (int k = 0; k < 8; k++) {
+                                    for (int l = 0; l < 8; l++) {
+                                        if (validMoves[k][l]) {
+                                            // if the move can be made (doesnt cause check of own king), it is neither checkmate or stalemate
+                                            if (!tryMove(pieces[i][j], k, l)) {
+                                                result = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (!result) {
+                                        break;
+                                    }
+                                }
+                                resetValidMoves();
+                            }
+                            if (!result) {
+                                break;
+                            }
+                        }
+                        if (!result) {
+                            break;
+                        }
                     }
 
+                    // if game is over
+                    if (result) {
+                        if (check) {
+                            std::cout << "Checkmate!" << std::endl;
+                            checkmate = true;
+                        } else {
+                            std::cout << "Stalemate!" << std::endl;
+                            stalemate = true;
+                        }
+                    } else if (check) {
+                        std::cout << "Check!" << std::endl;
+                    } 
 
                 } else if (pieces[row][col] != nullptr && pieces[row][col]->getColour() == turn) {
+                    selectedPiece = pieces[row][col];
                     resetValidMoves();
-                    pieces[row][col]->findMoves(pieces, validMoves);
+                    selectedPiece->findMoves(pieces, validMoves, check);
                     for (int i = 0; i < 8; i++) {
                         for (int j = 0; j < 8; j++) {
                             if (validMoves[i][j]) {
-                                // simulate move on board
-                                Piece* temp = pieces[i][j];
-                                pieces[i][j] = pieces[row][col];
-                                pieces[i][j]->setIndexes(i, j);
-                                pieces[row][col] = nullptr;
-                                alternateTurn();
-
-                                // see if there is check
-                                if (!findCheck()) {
-                                    board[i][j].activate(validMoves[i][j]);
-                                } else {
+                                if (tryMove(selectedPiece, i, j)) {
                                     validMoves[i][j] = false;
+                                } else {
+                                    board[i][j].activate(true);
                                 }
-
-                                // return board to original state
-                                pieces[row][col] = pieces[i][j];
-                                pieces[row][col]->setIndexes(row, col);
-                                pieces[i][j] = temp;
-                                alternateTurn();
                             }
                         }
                     }
-                    selectedPiece = pieces[row][col];
+
+                    // implement castling rules
+                    if (selectedPiece->getType() == 'k' && !selectedPiece->getHasMoved()) {
+                        // kingside
+                        if (validMoves[row][col + 2]) {
+                            if (tryMove(selectedPiece, row, col + 1)) {
+                                validMoves[row][col + 2] = false;
+                                board[row][col + 2].activate(false);
+                            }
+                        }
+
+                        // queenside
+                        if (validMoves[row][col - 2]) {
+                            if (tryMove(selectedPiece, row, col - 1)) {
+                                validMoves[row][col - 2] = false;
+                                board[row][col - 2].activate(false);
+                            }
+                        }
+                    }
+                    
                 } else {
                     selectedPiece = nullptr;
                     resetValidMoves();
@@ -158,27 +210,30 @@ void Board::resetValidMoves() {
     }
 }
 
-bool Board::findCheck() {
-    Piece* king;
-    if (turn == 'w') {
-        king = kings[1]; // black king
+bool Board::isCheck(char colour) {
+    Piece* playerKing;
+    Piece* opponentKing;
+    if (colour == 'w') {
+        playerKing = kings[0]; // white king
+        opponentKing = kings[1]; // black king
     } else {
-        king = kings[0]; // white king
+        playerKing = kings[1]; // black king
+        opponentKing = kings[0]; // white king
     }
 
     bool moves[8][8];
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
-            if (pieces[row][col] != nullptr && pieces[row][col]->getColour() == turn) {
+            if (pieces[row][col] != nullptr && pieces[row][col]->getColour() != colour) {
                 for (int i = 0; i < 8; i++) {
                     for (int j = 0; j < 8; j++) {
                         moves[i][j] = false;
                     }
                 }
 
-                pieces[row][col]->findMoves(pieces, moves);
+                pieces[row][col]->findMoves(pieces, moves, check);
 
-                if (moves[king->getRow()][king->getCol()]) {
+                if (moves[playerKing->getRow()][playerKing->getCol()]) {
                     return true;
                 }
             }
@@ -195,6 +250,27 @@ void Board::alternateTurn() {
     }
 }
 
+bool Board::tryMove(Piece* piece, int row, int col) {
+    bool result;
+
+    // simulate move on board
+    int originalRow = piece->getRow();
+    int originalCol = piece->getCol();
+    Piece* temp = pieces[row][col];
+    pieces[row][col] = piece;
+    pieces[row][col]->setIndexes(row, col);
+    pieces[originalRow][originalCol] = nullptr;
+
+    // see if there is check
+    result = isCheck(turn);
+
+    // return board to original state
+    pieces[originalRow][originalCol] = pieces[row][col];
+    pieces[originalRow][originalCol]->setIndexes(originalRow, originalCol);
+    pieces[row][col] = temp;
+
+    return result;
+}
 
 void Board::draw(RenderTarget& target, RenderStates states) const {
     // draw squares

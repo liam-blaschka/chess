@@ -62,6 +62,10 @@ bool Piece::getIsFirstMove() {
     return isFirstMove;
 }
 
+bool Piece::getHasMoved() {
+    return hasMoved;
+}
+
 void Piece::lastMoved() {
     if (isFirstMove) {
         isFirstMove = false;

@@ -7,5 +7,5 @@ class Queen : public Piece {
         void findMovesHelper(int r, int c, Piece* board[8][8], bool validMoves[8][8], sf::Vector2i direction);
     public:
         Queen(char colour, int row, int col);
-        void findMoves(Piece* board[8][8], bool validMoves[8][8]) override;
+        void findMoves(Piece* board[8][8], bool validMoves[8][8], bool check) override;
 };
