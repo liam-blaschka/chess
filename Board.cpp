@@ -8,8 +8,9 @@
 #include "Queen.h"
 #include "King.h"
 #include <SFML/Graphics.hpp>
-
 #include <iostream>
+#include <string>
+#include <algorithm>
 
 using namespace sf;
 
@@ -74,129 +75,231 @@ void Board::setBoard() {
     turn = 'w';
     lastMovedPiece = nullptr;
     check = false;
-    checkmate = false;
-    stalemate = false;
+    gameOver = false;
 }
 
 void Board::mouseClick(Vector2f point) {
-    Square square;
-    for (int row = 0; row < 8; row ++) {
-        for (int col = 0; col < 8; col++) {
-            square = board[row][col];
-            if (square.contains(point)) {
-                if (selectedPiece != nullptr && validMoves[row][col] == true) {
-                    // remove any piece occupying destination
-                    if (pieces[row][col] != nullptr) {
-                        delete pieces[row][col];
-                    }
+    if (!gameOver) {
+        Square square;
+        for (int row = 0; row < 8; row ++) {
+            for (int col = 0; col < 8; col++) {
+                square = board[row][col];
+                if (square.contains(point)) {
+                    // make move
+                    if (selectedPiece != nullptr && validMoves[row][col] == true) {
+                        // remove any piece occupying destination
+                        if (pieces[row][col] != nullptr) {
+                            delete pieces[row][col];
+                        }
 
-                    // move piece
-                    selectedPiece->makeMove(pieces, row, col);
-                    selectedPiece = nullptr;
-                    resetValidMoves();
+                        // move piece
+                        board[selectedPiece->getRow()][selectedPiece->getCol()].select(false);
+                        selectedPiece->makeMove(pieces, row, col);
+                        selectedPiece = nullptr;
+                        resetValidMoves();
 
-                    // update last moved piece
-                    if (lastMovedPiece != nullptr) {
-                        lastMovedPiece->lastMoved();
-                    }
-                    lastMovedPiece = pieces[row][col];
+                        // promote pawn
+                        if (pieces[row][col]->getType() == 'p' && (row == 0 || row == 7)) {
+                            // update window with pawn move
+                            window->clear();
+                            draw();
+                            window->display();
 
-                    alternateTurn();
+                            Piece* temp = pieces[row][col];
+                            char colour = temp->getColour();
+                            
+                            bool validInput = false;
+                            while (!validInput) {
+                                std::string choice;
+                                std::cout << "Promote pawn (Rook, Knight, Bishop, Queen): ";
+                                std::cin >> choice;
+                                std::transform(choice.begin(), choice.end(), choice.begin(), ::tolower);
+                                
+                                if (choice == "rook") {
+                                    pieces[row][col] = new Rook(colour, row, col);
+                                    validInput = true;
+                                } else if (choice == "knight") {
+                                    pieces[row][col] = new Knight(colour, row, col);
+                                    validInput = true;
+                                } else if (choice == "bishop") {
+                                    pieces[row][col] = new Bishop(colour, row, col);
+                                    validInput = true;
+                                } else if (choice == "queen") {
+                                    pieces[row][col] = new Queen(colour, row, col);
+                                    validInput = true;
+                                }
 
-                    // see if check
-                    check = isCheck(turn);
+                                if (!validInput) {
+                                    std::cout << "Invalid option." << std::endl;
+                                }
+                            }
 
-                    // see if checkmate/stalemate
-                    bool result = true;
-                    // loop through each piece
-                    for (int i = 0; i < 8; i++) {
-                        for (int j = 0; j < 8; j++) {
-                            if (pieces[i][j] != nullptr && pieces[i][j]->getColour() == turn) {
-                                // loop through each move piece can make
-                                pieces[i][j]->findMoves(pieces, validMoves, check);
-                                for (int k = 0; k < 8; k++) {
-                                    for (int l = 0; l < 8; l++) {
-                                        if (validMoves[k][l]) {
-                                            // if the move can be made (doesnt cause check of own king), it is neither checkmate or stalemate
-                                            if (!tryMove(pieces[i][j], k, l)) {
-                                                result = false;
+                            delete temp;
+                        }
+
+
+                        // update last moved piece
+                        if (lastMovedPiece != nullptr) {
+                            lastMovedPiece->lastMoved();
+                        }
+                        lastMovedPiece = pieces[row][col];
+
+                        alternateTurn();
+
+                        // see if check
+                        check = isCheck(turn);
+
+                        // see if checkmate/stalemate/insufficient material
+                        int knights[2] = { 0, 0 };
+                        int bishops[2] = { 0, 0 };
+                        int otherPieces[2] = { 0, 0 };
+                        bool mateResult = true;
+                        // loop through each piece
+                        for (int i = 0; i < 8; i++) {
+                            for (int j = 0; j < 8; j++) {
+                                Piece* piece = pieces[i][j];
+                                if (piece != nullptr) {
+                                    if (piece->getColour() == turn) {
+
+                                        // to see if insufficient material
+                                        switch (piece->getType()) {
+                                            case 'n':
+                                                knights[0]++;
                                                 break;
+                                            case 'b':
+                                                bishops[0]++;
+                                                break;
+                                            case 'k':
+                                                break;
+                                            default:
+                                                otherPieces[0]++;
+                                        }
+
+
+                                        // to see if stalemate/checkmate
+                                        // loop through each move piece can make
+                                        if (mateResult) {
+                                            piece->findMoves(pieces, validMoves, check);
+                                            for (int k = 0; k < 8; k++) {
+                                                for (int l = 0; l < 8; l++) {
+                                                    if (validMoves[k][l]) {
+                                                        // if the move can be made (doesnt cause check of own king), it is neither checkmate or stalemate
+                                                        if (!tryMove(piece, k, l)) {
+                                                            mateResult = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (!mateResult) {
+                                                    break;
+                                                }
                                             }
+                                            resetValidMoves();
+                                        }
+
+                                    } else {
+                                        switch (piece->getType()) {
+                                            case 'n':
+                                                knights[1]++;
+                                                break;
+                                            case 'b':
+                                                bishops[1]++;
+                                                break;
+                                            case 'k':
+                                                break;
+                                            default:
+                                                otherPieces[1]++;
                                         }
                                     }
-                                    if (!result) {
-                                        break;
+                                }
+                            }
+                        }
+
+                        // determine if draw by insufficient material
+                        bool insufficientMaterial = false;
+                        if (!mateResult && otherPieces[0] == 0 && otherPieces[1] == 0) {
+                            if (knights[0] + bishops[0] <= 1 && knights[1] + bishops[1] <= 1)
+                            {
+                                insufficientMaterial = true;
+                            }
+                        }
+
+                        // if game is over
+                        if (mateResult) {
+                            if (check) {
+                                std::string winner;
+                                if (lastMovedPiece->getColour() == 'w') {
+                                    winner = "White";
+                                } else {
+                                    winner = "Black";
+                                }
+                                std::cout << winner << " wins by checkmate." << std::endl;
+                            } else { // need draw by  insufficient material, by repetition
+                                std::cout << "Draw by stalemate." << std::endl;
+                            }
+                            gameOver = true;
+                        } else if ((otherPieces[0] == 0 && otherPieces[1] == 0)
+                                    && ((knights[0] + bishops[0] <= 1 && knights[1] + bishops[1] <= 1)
+                                    || ((knights[0] == 2 && knights[1] + bishops[1] == 0) || (knights[1] == 2 && knights[0] + bishops[0] == 0))))
+                        {
+                            std::cout << "Draw by insufficient material." << std::endl;
+                            gameOver = true;
+                        } else if (check) {
+                            std::cout << "Check." << std::endl;
+                        } 
+
+                    // select piece
+                    } else if (pieces[row][col] != nullptr && pieces[row][col]->getColour() == turn) {
+                        if (selectedPiece != nullptr) {
+                            board[selectedPiece->getRow()][selectedPiece->getCol()].select(false);
+                        }
+                        selectedPiece = pieces[row][col];
+                        board[row][col].select(true);
+                        resetValidMoves();
+                        selectedPiece->findMoves(pieces, validMoves, check);
+                        for (int i = 0; i < 8; i++) {
+                            for (int j = 0; j < 8; j++) {
+                                if (validMoves[i][j]) {
+                                    if (tryMove(selectedPiece, i, j)) {
+                                        validMoves[i][j] = false;
+                                    } else {
+                                        board[i][j].activate(true);
                                     }
                                 }
-                                resetValidMoves();
-                            }
-                            if (!result) {
-                                break;
                             }
                         }
-                        if (!result) {
-                            break;
-                        }
-                    }
 
-                    // if game is over
-                    if (result) {
-                        if (check) {
-                            std::cout << "Checkmate!" << std::endl;
-                            checkmate = true;
-                        } else {
-                            std::cout << "Stalemate!" << std::endl;
-                            stalemate = true;
-                        }
-                    } else if (check) {
-                        std::cout << "Check!" << std::endl;
-                    } 
+                        // implement castling rules
+                        if (selectedPiece->getType() == 'k' && !selectedPiece->getHasMoved()) {
+                            // kingside
+                            if (validMoves[row][col + 2]) {
+                                if (tryMove(selectedPiece, row, col + 1)) {
+                                    validMoves[row][col + 2] = false;
+                                    board[row][col + 2].activate(false);
+                                }
+                            }
 
-                } else if (pieces[row][col] != nullptr && pieces[row][col]->getColour() == turn) {
-                    selectedPiece = pieces[row][col];
-                    resetValidMoves();
-                    selectedPiece->findMoves(pieces, validMoves, check);
-                    for (int i = 0; i < 8; i++) {
-                        for (int j = 0; j < 8; j++) {
-                            if (validMoves[i][j]) {
-                                if (tryMove(selectedPiece, i, j)) {
-                                    validMoves[i][j] = false;
-                                } else {
-                                    board[i][j].activate(true);
+                            // queenside
+                            if (validMoves[row][col - 2]) {
+                                if (tryMove(selectedPiece, row, col - 1)) {
+                                    validMoves[row][col - 2] = false;
+                                    board[row][col - 2].activate(false);
                                 }
                             }
                         }
+                        
+                    } else if (selectedPiece != nullptr) {
+                        board[selectedPiece->getRow()][selectedPiece->getCol()].select(false);
+                        selectedPiece = nullptr;
+                        resetValidMoves();
                     }
 
-                    // implement castling rules
-                    if (selectedPiece->getType() == 'k' && !selectedPiece->getHasMoved()) {
-                        // kingside
-                        if (validMoves[row][col + 2]) {
-                            if (tryMove(selectedPiece, row, col + 1)) {
-                                validMoves[row][col + 2] = false;
-                                board[row][col + 2].activate(false);
-                            }
-                        }
-
-                        // queenside
-                        if (validMoves[row][col - 2]) {
-                            if (tryMove(selectedPiece, row, col - 1)) {
-                                validMoves[row][col - 2] = false;
-                                board[row][col - 2].activate(false);
-                            }
-                        }
-                    }
-                    
-                } else {
-                    selectedPiece = nullptr;
-                    resetValidMoves();
+                    break;
                 }
-
+            }
+            if (square.contains(point)) {
                 break;
             }
-        }
-        if (square.contains(point)) {
-            break;
         }
     }
 }
@@ -272,11 +375,15 @@ bool Board::tryMove(Piece* piece, int row, int col) {
     return result;
 }
 
-void Board::draw(RenderTarget& target, RenderStates states) const {
+void Board::setWindow(sf::RenderWindow& window) {
+    this->window = &window;
+}
+
+void Board::draw() {
     // draw squares
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
-            target.draw(board[row][col]);
+            window->draw(board[row][col]);
         }
     }
 
@@ -284,7 +391,7 @@ void Board::draw(RenderTarget& target, RenderStates states) const {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             if (pieces[row][col] != nullptr) {
-                pieces[row][col]->draw(target, states);
+                window->draw(*pieces[row][col]);
             }
         }
     }

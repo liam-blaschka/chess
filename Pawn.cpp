@@ -1,8 +1,13 @@
 #include "Piece.h"
 #include "Pawn.h"
+#include "Rook.h"
+#include "Knight.h"
+#include "Bishop.h"
+#include "Queen.h"
 #include <SFML/Graphics.hpp>
-
 #include <iostream>
+#include <string>
+#include <algorithm>
 
 using namespace sf;
 

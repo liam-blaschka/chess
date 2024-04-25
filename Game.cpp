@@ -2,21 +2,26 @@
 #include "Board.h"
 #include <SFML/Graphics.hpp>
 
+#include <iostream>
+
 using namespace sf;
 
-Game::Game(RenderWindow& window) {
-    this->window = &window;
+Game::Game() {
+    window.create(VideoMode(600, 600), "Chess", Style::Titlebar| Style::Close);
+    window.setVerticalSyncEnabled(true);
+
+    board.setWindow(window);
     board.setBoard();
 }
 
 void Game::run() {
-    while (window->isOpen()) {
+    while (window.isOpen()) {
         Event event;
-        while (window->pollEvent(event)) {
+        while (window.pollEvent(event)) {
             switch (event.type) {
                 // window closed
                 case Event::Closed:
-                    window->close();
+                    window.close();
                     break;
 
                 // mouse clicked
@@ -30,8 +35,8 @@ void Game::run() {
                     break;
             }
         }
-
-        window->draw(board);
-        window->display();
+        window.clear();
+        board.draw();
+        window.display();
     }
 }

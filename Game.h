@@ -4,9 +4,9 @@
 
 class Game {
     private:
-        sf::RenderWindow* window;
+        sf::RenderWindow window;
         Board board;
     public:
-        Game(sf::RenderWindow& window);
+        Game();
         void run();
 };

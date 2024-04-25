@@ -3,8 +3,9 @@
 #include "Piece.h"
 #include <SFML/Graphics.hpp>
 
-class Board : public sf::Drawable {
+class Board {
     private:
+        sf::RenderWindow* window;
         Square board[8][8];
         Piece* pieces[8][8];
         bool validMoves[8][8];
@@ -13,8 +14,7 @@ class Board : public sf::Drawable {
         Piece* kings[2];
         Piece* lastMovedPiece;
         bool check;
-        bool checkmate;
-        bool stalemate;
+        bool gameOver;
     public:
         void setBoard();
         void mouseClick(sf::Vector2f point);
@@ -22,6 +22,7 @@ class Board : public sf::Drawable {
         bool isCheck(char colour);
         bool tryMove(Piece* piece, int row, int col);
         void alternateTurn();
-        void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+        void setWindow(sf::RenderWindow& window);
+        void draw();
         ~Board();
 };
