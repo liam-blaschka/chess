@@ -73,6 +73,7 @@ void Board::setBoard() {
         }
     }
     turn = 'w';
+    turnKing = kings[0];
     lastMovedPiece = nullptr;
     check = false;
     gameOver = false;
@@ -224,6 +225,11 @@ void Board::mouseClick(Vector2f point) {
                             }
                         }
 
+                        // show which king in check
+                        if (check || mateResult) {
+                            board[turnKing->getRow()][turnKing->getCol()].setCheck(true);
+                        }
+
                         // if game is over
                         if (mateResult) {
                             if (check) {
@@ -246,7 +252,17 @@ void Board::mouseClick(Vector2f point) {
                             gameOver = true;
                         } else if (check) {
                             std::cout << "Check." << std::endl;
-                        } 
+                        } else {
+                            // remove check outline from king
+                            int index;
+                            if (turn == 'w') {
+                                index = 1;
+                            } else {
+                                index = 0;
+                            }
+                            board[kings[index]->getPreviousRow()][kings[index]->getPreviousCol()].setCheck(false);
+                            board[kings[index]->getRow()][kings[index]->getCol()].setCheck(false);
+                        }
 
                     // select piece
                     } else if (pieces[row][col] != nullptr && pieces[row][col]->getColour() == turn) {
@@ -348,8 +364,10 @@ bool Board::isCheck(char colour) {
 void Board::alternateTurn() {
     if (turn == 'w') {
         turn = 'b';
+        turnKing = kings[1];
     } else {
         turn = 'w';
+        turnKing = kings[0];
     }
 }
 

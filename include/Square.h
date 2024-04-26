@@ -7,6 +7,7 @@ class Square : public sf::Drawable {
         sf::FloatRect bounds;
         bool isActivated;
         bool isSelected;
+        bool isCheck;
         int row;
         int col;
     public:
@@ -15,6 +16,7 @@ class Square : public sf::Drawable {
         bool contains(sf::Vector2f point);
         void activate(bool isActivated);
         void select(bool isSelected);
+        void setCheck(bool inCheck);
         int getRow();
         int getCol();
         void draw(sf::RenderTarget& target, sf::RenderStates states) const override;

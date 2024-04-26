@@ -11,6 +11,7 @@ class Board {
         bool validMoves[8][8];
         Piece* selectedPiece;
         char turn;
+        Piece* turnKing;
         Piece* kings[2];
         Piece* lastMovedPiece;
         bool check;

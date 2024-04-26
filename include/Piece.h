@@ -12,6 +12,8 @@ class Piece : public sf::Drawable {
         sf::Vector2f position;
         int row;
         int col;
+        int previousRow;
+        int previousCol;
         bool isFirstMove;
         bool hasMoved;
     public:
@@ -23,6 +25,8 @@ class Piece : public sf::Drawable {
         virtual void makeMove(Piece* board[8][8], int row, int col);
         int getRow();
         int getCol();
+        int getPreviousRow();
+        int getPreviousCol();
         void setIndexes(int row, int col);
         bool getIsFirstMove();
         bool getHasMoved();

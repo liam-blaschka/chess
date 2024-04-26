@@ -8,12 +8,14 @@ Piece::Piece(char type, char colour, int row, int col) {
     this->colour = colour;
     this->row = row;
     this->col = col;
+    previousRow = row;
+    previousCol = col;
     hasMoved = false;
     isFirstMove = false;
 
     setPosition(row, col);
 
-    chessPieces.loadFromFile("./ChessPieces.png");
+    chessPieces.loadFromFile("../assets/ChessPieces.png");
     chessPieces.setSmooth(true);
 }
 
@@ -33,6 +35,8 @@ void Piece::makeMove(Piece* board[8][8], int row, int col) {
     board[this->row][this->col] = nullptr;
 
     // set new position
+    previousRow = this->row;
+    previousCol = this->col;
     this->row = row;
     this->col = col;
     setPosition(row, col);
@@ -51,6 +55,14 @@ int Piece::getRow() {
 
 int Piece::getCol() {
     return col;
+}
+
+int Piece::getPreviousRow() {
+    return previousRow;
+}
+
+int Piece::getPreviousCol() {
+    return previousCol;
 }
 
 void Piece::setIndexes(int row, int col) {
