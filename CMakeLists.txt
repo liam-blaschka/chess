@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SFML_DIR "${PROJECT_SOURCE_DIR}/lib/SFML")
 
 # Instruct CMake to find the SFML package
-find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
+find_package(SFML 2.5 COMPONENTS graphics window system)
 
 # Add all your source files
 file(GLOB SOURCES "src/*.cpp")
